@@ -27,7 +27,6 @@ const Sidebar = ({ fullName, avatar, email }: Props) => {
             <nav className="sidebar-nav">
                 <ul className="flex flex-1 flex-col gap-6">
                     {navItems.map(({ url, name, icon }) => (
-                        // pathname === url
                         <Link href={url} key={url} className="lg:w-full">
                             <li className={cn("sidebar-nav-item", pathname === url && "shad-active")}>
                                 <Image
