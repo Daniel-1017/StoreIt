@@ -17,15 +17,18 @@ import Link from "next/link";
 import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { renameFile } from "@/lib/actions/file.actions";
+import { usePathname } from "next/navigation";
 
 const ActionsDropdown = ({ file }: { file: Models.Document }) => {
+    const path = usePathname();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [action, setAction] = useState<ActionType | null>(null);
     const [name, setName] = useState(file.name);
     const [isLoading, setIsLoading] = useState(false);
 
-    const closeAllModal = () => {
+    const closeAllModals = () => {
         setIsModalOpen(false);
         setIsDropdownOpen(false);
         setAction(null);
@@ -33,7 +36,23 @@ const ActionsDropdown = ({ file }: { file: Models.Document }) => {
         // setEmail([]);
     };
 
-    const handleAction = async () => {};
+    const handleAction = async () => {
+        if (!action) return;
+        setIsLoading(true);
+        let success = false;
+
+        const actions = {
+            rename: () => renameFile({ fileId: file.$id, name, extension: file.extension, path }),
+            share: () => console.log("share"),
+            delete: () => console.log("delete"),
+        };
+
+        success = await actions[action.value as keyof typeof actions]();
+
+        if (success) closeAllModals();
+
+        setIsLoading(false);
+    };
 
     const renderDialogContent = () => {
         if (!action) return null;
@@ -49,7 +68,7 @@ const ActionsDropdown = ({ file }: { file: Models.Document }) => {
 
                 {["rename", "delete", "share"].includes(value) && (
                     <DialogFooter className="flex flex-col gap-3 md:flex-row">
-                        <Button onClick={closeAllModal} className="modal-cancel-button">
+                        <Button onClick={closeAllModals} className="modal-cancel-button">
                             Cancel
                         </Button>
                         <Button onClick={handleAction} className="modal-submit-button">
